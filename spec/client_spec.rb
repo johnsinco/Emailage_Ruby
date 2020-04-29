@@ -6,7 +6,7 @@ describe Emailage::Client do
   let(:ip) {'1.234.56.7'}
   
   before {
-    allow(t).to receive(:get) {double :response, :body => "\xEF\xBB\xBF{\"success\":[true]}"}
+    allow(t).to receive(:get) {double :response, :body => "\xEF\xBB\xBF{\"success\":[true]}", :success? => true}
     stub_const 'Typhoeus', t
   }
   
@@ -27,7 +27,9 @@ describe Emailage::Client do
       request
       expect(t).to have_received(:get).with\
         "https://sandbox.emailage.com/emailagevalidator/endpoint/",
-        :params => a_hash_including(:query => 'something', :oauth_consumer_key => 'secret')
+        :params => a_hash_including(:query => 'something', :oauth_consumer_key => 'secret'),
+        :connecttimeout => 30,
+        :timeout => 60
     end
   
     it 'parses response body as JSON' do

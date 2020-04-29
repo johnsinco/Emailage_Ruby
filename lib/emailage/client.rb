@@ -44,10 +44,15 @@ module Emailage
         :oauth_version => 1.0
       }.merge(params)
       
-      res = Typhoeus.get url, :params => params.merge(:oauth_signature => Signature.create('GET', url, params, @hmac_key))
+      res = Typhoeus.get url, :params => params.merge(:oauth_signature => Signature.create('GET', url, params, @hmac_key)), timeout: 60, connecttimeout: 30
       
-      json = res.body.sub(/^[^{]+/, '')
-      JSON.parse json
+      if res.success?
+        json = res.body.sub(/^[^{]+/, '')
+        JSON.parse json
+      else
+        raise "HTTP Error calling Emailage.request, status: #{res.code}" if raise_errors
+        nil
+      end
     end
     
     public
